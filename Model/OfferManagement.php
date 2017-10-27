@@ -18,6 +18,7 @@ use Smile\Offer\Api\OfferManagementInterface;
 use Smile\Offer\Api\Data\OfferInterfaceFactory as OfferFactory;
 use Smile\Offer\Api\OfferRepositoryInterface;
 use Smile\Offer\Model\ResourceModel\Offer\CollectionFactory as OfferCollectionFactory;
+use Magento\Framework\Api\ExtensionAttribute\JoinProcessorInterface;
 
 /**
  * Offer Management
@@ -43,6 +44,8 @@ class OfferManagement implements OfferManagementInterface
      */
     private $offerCollectionFactory;
 
+    private $joinProcessor;
+
     /**
      * OfferManagement constructor.
      *
@@ -53,11 +56,13 @@ class OfferManagement implements OfferManagementInterface
     public function __construct(
         OfferRepositoryInterface $offerRepository,
         OfferFactory $offerFactory,
-        OfferCollectionFactory $offerCollectionFactory
+        OfferCollectionFactory $offerCollectionFactory,
+        JoinProcessorInterface $joinProcessor
     ) {
         $this->offerFactory    = $offerFactory;
         $this->offerRepository = $offerRepository;
         $this->offerCollectionFactory = $offerCollectionFactory;
+        $this->joinProcessor = $joinProcessor;
     }
 
    /**
@@ -80,6 +85,7 @@ class OfferManagement implements OfferManagementInterface
     {
         $offerCollection = $this->offerCollectionFactory->create();
         $offerCollection->addProductFilter($productId);
+        $this->joinProcessor->process($offerCollection);
 
         return $offerCollection->getItems();
     }
@@ -91,6 +97,7 @@ class OfferManagement implements OfferManagementInterface
     {
         $offerCollection = $this->offerCollectionFactory->create();
         $offerCollection->addSellerFilter($sellerId);
+        $this->joinProcessor->process($offerCollection);
 
         return $offerCollection->getItems();
     }
@@ -107,6 +114,7 @@ class OfferManagement implements OfferManagementInterface
 
         $offerCollection->addProductFilter($productId)
             ->addSellerFilter($sellerId);
+        $this->joinProcessor->process($offerCollection);
 
         return $offerCollection->getFirstItem();
     }
